@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+if ! command -v node &> /dev/null; then
+    echo "REscripts requires node in order to run."
+    echo "Get it from here: https://nodejs.org"
+fi
+
+if ! command -v zx &> /dev/null; then
+    echo "REscripts requires zx in order to run."
+    echo "Run 'npm i -g zx' in order to install zx."
+fi
+
+if ! command -v diff &> /dev/null; then
+    echo "WARN: REscripts requires 'diff' in order to generate wasm differences."
+fi
+
+if ! command -v wasm-decompile &> /dev/null; then
+    echo "WARN: REscripts requires the 'wabt' toolkit in order to manipulate wasm files."
+fi
+
+zx ./rescripts.mjs -- $@

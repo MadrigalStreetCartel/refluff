@@ -1,0 +1,17 @@
+# Ignore large files
+**/*.h
+**/*.c
+**/*.pseudo.c
+**/*.wat
+
+# Ignore clients
+clients
+
+# Ignore diffs
+**/*.diff
+
+#Ignore binaries
+**/*.exe
+
+# misc
+private
