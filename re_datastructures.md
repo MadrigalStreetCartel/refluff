@@ -13,8 +13,8 @@ Each world data file has a fixed 5-byte header. Since 5 bytes is a pretty weird 
 
 | Offset | Hex Value | UTF-8 | Remarks                                 |
 | ------ | --------- | ----- | --------------------------------------- |
-| 0x00   | 0x25      | C     |                                         |
-| 0x01   | 0x43      | J     |                                         |
-| 0x02   | 0x4A      | S     |                                         |
-| 0x03   | 0x53      | %     |                                         |
+| 0x00   | 0x25      | %     |                                         |
+| 0x01   | 0x43      | C     |                                         |
+| 0x02   | 0x4A      | J     |                                         |
+| 0x03   | 0x53      | S     |                                         |
 | 0x04   | 0x01      |       | Not sure if actually part of the header |
