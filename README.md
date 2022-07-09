@@ -1,8 +1,8 @@
-# refluff
-> Reverse Engineering Flyff Universe For Fun
+# reFluff
+
+![reFluff Banner](./banner.png)
 
 This is a collection of developer tools not meant for normal players.<br>
-
 If you're looking for the bot, you can find it here: [Neuz Bot](https://github.com/MadrigalStreetCartel/neuz)
 
 ## Components
