@@ -8,8 +8,8 @@ If you're looking for the bot, you can find it here: [Neuz Bot](https://github.c
 ## Community
 
 1. Join our Discord: https://discord.gg/cZr3X3mCnq
-2. Mention that you're coming from the refluff repo in `#🔑apply-for-access`
-3. Wait for a mod to give you the `Dev-Access` role (should be fairly quick)
+2. Mention you're coming from refluff in `#🔑apply-for-access`
+3. Wait for a mod to give you the developer role (should be fairly quick)
 4. Discuss reverse engineering efforts in the relevant channels! 🎉
 
 ## FlyffU Documentation
