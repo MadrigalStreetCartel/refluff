@@ -22,3 +22,10 @@
 ```sh
 ./rescripts dump
 ```
+
+**Dump known resources for the latest FlyffU client**
+> This will download a potentially large number of files (world data, etc.)
+
+```sh
+./rescripts resdump
+```

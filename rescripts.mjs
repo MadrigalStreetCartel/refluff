@@ -1,13 +1,42 @@
 #!/usr/bin/env zx
 
+//
+// Useful Constants
+//
+
 const PATH_CLIENTS = './clients'
+const BASE_URL_CDN = 'https://gcpcdn-universe.flyff.com/client'
+
+/**
+ * Print the help text.
+ */
+ const printHelp = () => {
+    console.log(`
+        Usage: ./rescripts <subcommand> [options]
+
+        subcommands:
+        | version           Fetch latest FlyffU client version
+        | dump              Dump and decompile latest FlyffU client
+        | resdump           Dump known resources (world data, etc.)
+
+        options:
+        | -h  --help        Show this help text
+    `.trim().split('\n').map(x => x.trim()).map(x => x.startsWith('|') ? `  ${x.substring(1)}` : x).join('\n'))
+}
 
 /**
  * General utils.
  */
 const Utils = {
-    parseInt: str => typeof str === 'Number' ? str : !!str ? parseInt(str) : str,
     exit: code => process.exit(code),
+    parse_int: str => typeof str === 'Number' ? str : !!str ? parseInt(str) : str,
+    fetch_binary: async (url, path) => {
+        const resp = await fetch(url, { cache: 'no-cache' })
+        const data = await resp.arrayBuffer()
+        const buffer = Buffer.from(data)
+        await fs.writeFile(path, buffer)
+        Log.out(path)
+    }
 }
 
 /**
@@ -16,23 +45,8 @@ const Utils = {
 const Log = {
     info: text => console.log(`${chalk.yellow('INFO')} ${text}`),
     out: filename => console.log(`${chalk.yellow('OUT')} ${chalk.cyan(filename)}`),
-    example: (command, extra) => console.log(`${chalk.yellow('INFO')} Run ${chalk.green(command)} ${extra}`.trim())
-}
-
-/**
- * Print the help text.
- */
-const printHelp = () => {
-    console.log(`
-        Usage: ./rescripts <subcommand> [options]
-
-        subcommands:
-        | version           Fetch latest FlyffU client version
-        | dump              Dump and decompile latest FlyffU client
-
-        options:
-        | -h  --help        Show this help text
-    `.trim().split('\n').map(x => x.trim()).map(x => x.startsWith('|') ? `  ${x.substring(1)}` : x).join('\n'))
+    progress: fraction => console.log(`${chalk.yellow('PROGRESS')} ${chalk.green((fraction * 100).toFixed(2))}%`),
+    example: (command, extra) => console.log(`${chalk.yellow('INFO')} Run ${chalk.green(command)} ${extra}`.trim()),
 }
 
 class LocalClient {
@@ -43,7 +57,7 @@ class LocalClient {
      * @param {string} path
      */
     constructor(version, path) {
-        this.version = Utils.parseInt(version)
+        this.version = Utils.parse_int(version)
         this.path = path
     }
 
@@ -60,6 +74,38 @@ class LocalClient {
     }
 }
 
+class InclusiveRange {
+    /**
+     * Construct a new `InclusiveRange`.
+     *
+     * @param {number} start
+     * @param {number} end
+     */
+    constructor(start, end) {
+        this.start = Math.min(start, end)
+        this.end = Math.max(start, end)
+    }
+
+    /**
+     * Get the length of the range.
+     *
+     * @returns {number}
+     */
+    get length() {
+        return 1 + this.end - this.start
+    }
+
+    /**
+     * Offset the range start by `index`.
+     *
+     * @param {number} index
+     * @returns {number}
+     */
+    offset(index) {
+        return this.start + index
+    }
+}
+
 /**
  * Extract current FilemapVersion from FlyffU website.
  *
@@ -71,7 +117,7 @@ const check_filemap_version = async () => {
     const resp = await fetch(url, { cache: 'no-cache' })
     const text = await resp.text()
     const re_version = /var\s+FilemapVersion\s*=\s*'(?<version>\d+)'/
-    return Utils.parseInt(text.match(re_version).groups?.version)
+    return Utils.parse_int(text.match(re_version).groups?.version)
 }
 
 /**
@@ -82,7 +128,7 @@ const check_filemap_version = async () => {
  */
 const dump_wasm = async version => {
     Log.info('Dumping main-wasm32...')
-    const url = `https://gcpcdn-universe.flyff.com/client/program/web/main-wasm32.wasm?${version}`
+    const url = `${BASE_URL_CDN}/program/web/main-wasm32.wasm?${version}`
     const resp = await fetch(url, { cache: 'no-cache' })
     const data = await resp.arrayBuffer()
     return Buffer.from(data)
@@ -151,6 +197,29 @@ const wasm_decompile = async client => {
     Log.out(path_out)
 }
 
+const dump_world_data = async client => {
+    Log.info('Dumping all wdmadrigal assets...')
+    const base_dir = path.join(client.path, 'res', 'world', 'wdmadrigal')
+    await fs.mkdirp(base_dir)
+    await Utils.fetch_binary(`${BASE_URL_CDN}/world/wdmadrigal/wdmadrigal.bin`, path.join(base_dir, 'wdmadrigal.bin'))
+    const range_i = new InclusiveRange(29, 36)
+    const range_j = new InclusiveRange(9, 16)
+    const total = range_i.length * range_j.length
+    let count = 0
+    for (let i = 0; i < range_i.length; i++) {
+        const a = range_i.offset(i).toString().padStart(2, '0')
+        for (let j = 0; j < range_j.length; j++) {
+            Log.progress(count++ / total)
+            const b = range_j.offset(j).toString().padStart(2, '0')
+            const filename = `wdmadrigal${a}-${b}.bin`
+            const url = `${BASE_URL_CDN}/world/wdmadrigal/${filename}`
+            const out_path = path.join(base_dir, filename)
+            await Utils.fetch_binary(url, out_path)
+        }
+    }
+    Log.progress(1)
+}
+
 /**
  * Main entry point.
  */
@@ -167,7 +236,6 @@ const main = async () => {
 
         // Check latest FlyffU client version
         case 'version': {
-            // Check filemap version
             const version = await check_filemap_version()
             const local_clients = await enumerate_local_clients()
             const client = local_clients.find(client => client.version === version)
@@ -207,6 +275,20 @@ const main = async () => {
             await wasm2wat(client)
             await wasm_decompile(client)
             await wasm2c(client)
+            break
+        }
+
+        // Dump known resources for the latest FlyffU client
+        case 'resdump': {
+            const version = await check_filemap_version()
+            const local_clients = await enumerate_local_clients()
+            const client = local_clients.find(client => client.version === version)
+            if (!client) {
+                Log.info(`Version ${version} has not been downloaded yet.`)
+                Log.example('./rescripts dump', 'first, then rerun the resdump command.')
+                Utils.exit(0)
+            }
+            await dump_world_data(client)
             break
         }
         default: {

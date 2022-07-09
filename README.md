@@ -5,12 +5,27 @@
 This is a collection of developer tools not meant for normal players.<br>
 If you're looking for the bot, you can find it here: [Neuz Bot](https://github.com/MadrigalStreetCartel/neuz)
 
-## Components
+## Community
+
+1. Join our Discord: https://discord.gg/cZr3X3mCnq
+2. Mention that you're coming from the refluff repo in `#🔑apply-for-access`
+3. Wait for a mod to give you the `Dev-Access` role (should be fairly quick)
+4. Discuss reverse engineering efforts in the relevant channels! 🎉
+
+## FlyffU Documentation
+> These docs are very much a work in progress.<br>
+> They will be updated as reverse engineering progresses.
+
+- [Resource URLs Documentation](./re_resource_urls.md)
+- [Data Structure Documentation](./re_datastructures.md)
+- [Networking Protocol Documentation](./re_networking_protocol.md)
+
+## reFluff Components
 
 ### rescripts
-> CLI tool for dumping, decompiling and analyzing FlyffU wasm files
+> CLI tool for dumping, decompiling and analyzing FlyffU resources
 
-[rescripts Docs](./docs/rescripts.md)
+[rescripts Docs](./rescripts.md)
 
 ## FlyffU Version Table
 
