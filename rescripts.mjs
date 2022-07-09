@@ -38,7 +38,7 @@ const printHelp = () => {
 class LocalClient {
     /**
      * Construct a new `LocalClient`.
-     * 
+     *
      * @param {string|number} version
      * @param {string} path
      */
@@ -49,7 +49,7 @@ class LocalClient {
 
     /**
      * Get a human-readable version string.
-     * 
+     *
      * @example
      * ```js
      * new LocalClient(42, './clients/v42').versionString() // 'v42'
@@ -62,7 +62,7 @@ class LocalClient {
 
 /**
  * Extract current FilemapVersion from FlyffU website.
- * 
+ *
  * @returns {number}
  */
 const check_filemap_version = async () => {
@@ -76,7 +76,7 @@ const check_filemap_version = async () => {
 
 /**
  * Dump main wasm binary.
- * 
+ *
  * @param {number} version
  * @returns {Buffer} wasm data
  */
@@ -90,7 +90,7 @@ const dump_wasm = async version => {
 
 /**
  * Enumerate local client versions.
- * 
+ *
  * @returns {Array<LocalClient>}
  */
 const enumerate_local_clients = async () => {
@@ -112,7 +112,7 @@ const enumerate_local_clients = async () => {
 
 /**
  * Convert the main-wasm32.wasm to wat format
- * 
+ *
  * @param {LocalClient} client
  */
 const wasm2wat = async client => {
@@ -125,7 +125,7 @@ const wasm2wat = async client => {
 
 /**
  * Decompile the main-wasm32.wasm to into c
- * 
+ *
  * @param {LocalClient} client
  */
  const wasm2c = async client => {
@@ -140,7 +140,7 @@ const wasm2wat = async client => {
 
 /**
  * Decompile the main-wasm32.wasm into a a more readable, c-like pseudo-language
- * 
+ *
  * @param {LocalClient} client
  */
 const wasm_decompile = async client => {
