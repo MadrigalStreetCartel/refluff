@@ -40,9 +40,9 @@ macro_rules! printhex {
     ($addr:literal: $width:ty = $val:expr; $comment:literal) => {{
         use colored::*;
         let padcount = <$width>::BITS as usize / 4;
-        let padding = format!("{:0>padding$}", "", padding = 8 - padcount);
+        let padding = format!("{:_>padding$}", "", padding = 8 - padcount);
         let hexvalue = format!("{value:0width$x}", value = $val, width = padcount);
-        let value = format!("0x{}{}", padding.black(), hexvalue.white());
+        let value = format!("0x{}{}", hexvalue.white(), padding.black());
         let address = {
             if <$width>::BITS == 8 {
                 format!("{: <9}{:#06x}", "", $addr)

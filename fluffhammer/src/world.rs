@@ -14,6 +14,7 @@ pub enum Error {
 pub struct WorldHeader {
     magic: u32,
     version: u8,
+    size: u16,
 }
 
 #[derive(Debug, Default)]
@@ -26,8 +27,8 @@ impl World {
         let mut reader = BinaryReader::from_u8(data);
 
         // I don't even know the endianess at the moment.
-        // I would guess it's BigEndian, but I'm not sure
-        reader.set_endian(Endian::Big);
+        // I would guess it's LittleEndian, but I'm not sure
+        reader.set_endian(Endian::Little);
 
         // Parse header
         let header = {
@@ -35,7 +36,7 @@ impl World {
             // 0x0000 - 0x0003 | Magic number?
             let magic = reader.read_u32()?;
             printhex!(0x0000: u32 = magic; "Magic Number");
-            require!(magic => HEADER_MAGIC_BE; else Error::InvalidHeader);
+            require!(magic => HEADER_MAGIC_LE; else Error::InvalidHeader);
 
             // 0x0004 | Always 0x01 -> Version?
             let version = reader.read_u8()?;
@@ -60,15 +61,16 @@ impl World {
             require!(b => 0x00; else Error::InvalidHeader);
 
             // Maybe 0x0007 - 0x0008 should be read as a u16?
-            // In that case it's always a multiple of 256 in BE.
+            // BE: Always a multiple of 256
+            // LE: Always between 0x1 and 0x9
             reader.jmp(0x0007);
             let b = reader.read_u16()?;
             printhex!(0x0007: u16 = b); // 0x0100 - 0x0900 (256 - 2304) in BE
 
             // 0x0009 - 0x000a
             // Mostly different, let's read it as u16 for now
-            let b = reader.read_u16()?; // ?
-            printhex!(0x0009: u16 = b);
+            let size = reader.read_u16()?; // Size?
+            printhex!(0x0009: u16 = size; "Size?");
 
             // 0x000b | Always 0x00 or 0x01
             let b = reader.read_u8()?;
@@ -78,7 +80,7 @@ impl World {
             let b = reader.read_u8()?;
             require!(b => 0x00; else Error::InvalidHeader);
 
-            WorldHeader { magic, version }
+            WorldHeader { magic, version, size }
         };
 
         Ok(World { header })
