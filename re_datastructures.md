@@ -33,3 +33,5 @@ Afterwards, it's getting a bit tricky.
 | 0x000a | ?         |                                   |
 | 0x000b | ?         | Always 0x00 or 0x01               |
 | 0x000c | 0x00      | Always 0x00                       |
+
+I'm guessing `0x0007-0x0008` should be read as a `uint16`. It's always a multiple of 256 in BigEndian.
