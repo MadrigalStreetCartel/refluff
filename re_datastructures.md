@@ -3,18 +3,33 @@
 
 ## World Data
 
-### Header
+### Info
 
-**Info**
+Endianness: Big (not sure if correct, seems to make the most sense right now)
 
-Each world data file has a fixed 5-byte header. Since 5 bytes is a pretty weird length for header, I'm guessing it's actually a 4-byte (uint32) header and the fifth byte means something different, but is coincidentally always the same.
+You can play around with the file format using fluffhammer (requires Rust knowledge): [Fluffhammer Docs](./fluffhammer.md)
 
-**Structure**
+### Structure
 
-| Offset | Hex Value | UTF-8 | Remarks                                 |
-| ------ | --------- | ----- | --------------------------------------- |
-| 0x00   | 0x25      | %     |                                         |
-| 0x01   | 0x43      | C     |                                         |
-| 0x02   | 0x4A      | J     |                                         |
-| 0x03   | 0x53      | S     |                                         |
-| 0x04   | 0x01      |       | Not sure if actually part of the header |
+Each world data file has the same 4-byte magic number.
+
+| Offset | Hex Value | UTF-8 | Remarks |
+| ------ | --------- | ----- | ------- |
+| 0x0000 | 0x25      | %     |         |
+| 0x0001 | 0x43      | C     |         |
+| 0x0002 | 0x4A      | J     |         |
+| 0x0003 | 0x53      | S     |         |
+
+Afterwards, it's getting a bit tricky.
+
+| Offset | Hex Value | Remarks                           |
+| ------ | --------- | --------------------------------- |
+| 0x0004 | 0x01      | Maybe version number? Always 0x01 |
+| 0x0005 | ?         |                                   |
+| 0x0006 | ?         |                                   |
+| 0x0007 | ?         | Always between 0x01 and 0x09      |
+| 0x0008 | 0x00      | Always 0x00                       |
+| 0x0009 | ?         |                                   |
+| 0x000a | ?         |                                   |
+| 0x000b | ?         | Always 0x00 or 0x01               |
+| 0x000c | 0x00      | Always 0x00                       |
