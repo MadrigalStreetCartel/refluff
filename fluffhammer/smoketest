@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+cargo build &>/dev/null
+for file in ../clients/v42/res/world/wdmadrigal/*.bin; do
+    echo "$file"
+    ./target/debug/fluffhammer parse-world "$file"
+done

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.17">
+    <grammar name="FlyffU World" start="id:24" author="MadrigalStreetCartel" fileextension="bin" uti="com.apple.macbinary-archive">
+        <description>Grammar for FlyffU world files</description>
+        <structure name="header" id="24" length="15" alignment="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <binary name="magic" mustmatch="yes" id="25" strokecolor="0072B3" length="4">
+                <fixedvalues>
+                    <fixedvalue name="Magic" value="25434A53"/>
+                </fixedvalues>
+            </binary>
+            <number name="version" id="26" strokecolor="00AB00" type="integer" length="1"/>
+            <binary name="unknown_u16_00" id="27" length="2"/>
+            <binary name="unknown_u16_01" id="28" length="2"/>
+            <number name="size" id="29" type="integer" length="2"/>
+        </structure>
+    </grammar>
+</ufwb>

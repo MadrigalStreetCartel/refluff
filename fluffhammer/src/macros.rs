@@ -37,28 +37,44 @@ macro_rules! require {
 /// printhex!(0x0004: u16 = version; "Version");
 /// ```
 macro_rules! printhex {
-    ($addr:literal: $width:ty = $val:expr; $comment:literal) => {{
+    (__print_table) => {{
         use colored::*;
-        let padcount = <$width>::BITS as usize / 4;
-        let padding = format!("{:_>padding$}", "", padding = 8 - padcount);
-        let hexvalue = format!("{value:0width$x}", value = $val, width = padcount);
-        let value = format!("0x{}{}", hexvalue.white(), padding.black());
-        let address = {
-            if <$width>::BITS == 8 {
-                format!("{: <9}{:#06x}", "", $addr)
-            } else {
-                let offset = (<$width>::BITS - 8) / 8;
-                format!("{:#06x} - {:#06x}", $addr, $addr + offset)
-            }
-        };
         println!(
-            "{address} {value} {comment}",
-            address = address.blue(),
-            value = value.white(),
-            comment = $comment.green()
+            "{}",
+            format!(
+                "{start} {hex_value} {dec_value} {end} {comment}",
+                start = format!("{: <6}", "start"),
+                end = format!("{: <6}", "end"),
+                hex_value = format!("{: <10}", "hex"),
+                dec_value = format!("{: <10}", "dec"),
+                comment = "comment"
+            ).bright_black()
         );
     }};
+    ($addr:literal: $width:ty = $val:expr; $comment:literal) => {{
+        use colored::*;
+        let val = { $val };
+        let addr = { $addr };
+        let hex_pad_count = <$width>::BITS as usize / 4;
+        let hex_value = format!("{value:0width$x}", value = val, width = hex_pad_count);
+        let hex_padding = format!("{:_>padding$}", "", padding = 8 - hex_pad_count);
+        let dec_value = val.to_string();
+        let dec_padding = format!("{:_>padding$}", "", padding = 10 - dec_value.len());
+        let padded_hex_value = format!("0x{}{}", hex_value.white(), hex_padding.black());
+        let padded_dec_value = format!("{}{}", dec_value.white(), dec_padding.black());
+        let offset_start = format!("{:#06x}", addr);
+        let offset_end = format!("{:#06x}", addr + (<$width>::BITS - 8) / 8);
+        println!(
+            "{offset_start} {hex_value} {dec_value} {offset_end} {comment}",
+            offset_start = offset_start.blue(),
+            offset_end = offset_end.blue(),
+            hex_value = padded_hex_value,
+            dec_value = padded_dec_value,
+            comment = $comment.green()
+        );
+        val
+    }};
     ($addr:literal: $width:ty = $val:expr) => {{
-        printhex!($addr: $width = $val; "");
+        printhex!($addr: $width = $val; "")
     }};
 }

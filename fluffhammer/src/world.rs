@@ -10,11 +10,31 @@ pub enum Error {
     InvalidHeader,
 }
 
+/// World Header.
+///
+/// Things that _could_ be in here:
+/// - Magic number (confirmed)
+/// - Version (unsure)
+/// - Size (unsure)
+/// - ID (unsure, likely u16; example: 1018 for Flaris)
+/// - Town (unsure, bool, most likely 0x00 or 0x01)
+/// - Polygons / Coords (unsure, maybe pairs of u16 for x and z coords)
+///
+/// The FlyffU API describes continents using polygons, but since the world here
+/// actually has to be renderered I'd expect them to include more info. Maybe (x, y, z, h)?
+///
+/// The old Flyff lnd format has a fixed chunkset of 129x129 and only stores height as i16 for each chunk.
+/// Landscape flags such as [NoDie, NoMove, NoFly, NoWalk] are inferred from the height value.
 #[derive(Debug, Default)]
 pub struct WorldHeader {
+    /// Magic number
     magic: u32,
+    /// Version
     version: u8,
+    __unknown0: u16,
+    __unknown1: u16,
     size: u16,
+    town: bool,
 }
 
 #[derive(Debug, Default)]
@@ -29,6 +49,7 @@ impl World {
         // I don't even know the endianess at the moment.
         // I would guess it's LittleEndian, but I'm not sure
         reader.set_endian(Endian::Little);
+        printhex!(__print_table);
 
         // Parse header
         let header = {
@@ -43,29 +64,18 @@ impl World {
             printhex!(0x0004: u8 = version; "Version?");
             require!(version => 0x01; else Error::InvalidHeader);
 
-            // 0x0005 - 0x0006 | These two seem to be different in most cases
-            let _ = reader.read_u8()?; // ?
-            let _ = reader.read_u8()?; // ?
-
             // Maybe 0x0005 - 0x0006 should be read as a u16?
             // Seems kinda random, no idea what this is.. Huge range of numbers.
-            reader.jmp(0x0005);
-            let b = reader.read_u16()?;
-            printhex!(0x0005: u16 = b);
-
-            // 0x0007 | Seems to always be between 0x01 and 0x09
-            let _ = reader.read_u8()?;
-
-            // 0x0008 | Always 0x00
-            let b = reader.read_u8()?;
-            require!(b => 0x00; else Error::InvalidHeader);
+            let __unknown0 = reader.read_u16()?;
+            printhex!(0x0005: u16 = __unknown0);
 
             // Maybe 0x0007 - 0x0008 should be read as a u16?
-            // BE: Always a multiple of 256
-            // LE: Always between 0x1 and 0x9
-            reader.jmp(0x0007);
-            let b = reader.read_u16()?;
-            printhex!(0x0007: u16 = b); // 0x0100 - 0x0900 (256 - 2304) in BE
+            // 0x0007 is always between 0x01 and 0x09
+            // 0x0008 is always 0x00
+            // BE: Always a multiple of 256 (0x0100 - 0x0900)
+            // LE: Always between 0x1 and 0x9 (0x0001 - 0x0009)
+            let __unknown1 = reader.read_u16()?;
+            printhex!(0x0007: u16 = __unknown1);
 
             // 0x0009 - 0x000a
             // Mostly different, let's read it as u16 for now
@@ -73,14 +83,22 @@ impl World {
             printhex!(0x0009: u16 = size; "Size?");
 
             // 0x000b | Always 0x00 or 0x01
-            let b = reader.read_u8()?;
-            printhex!(0x000b: u8 = b);
+            let town = printhex!(0x000b: u8 = reader.read_u8()?; "Town?") == 1;
 
             // 0x000c | Always 0x00
-            let b = reader.read_u8()?;
-            require!(b => 0x00; else Error::InvalidHeader);
+            printhex!(0x000c: u8 = reader.read_u8()?);
 
-            WorldHeader { magic, version, size }
+            printhex!(0x000d: u8 = reader.read_u8()?);
+            printhex!(0x000e: u16 = reader.read_u16()?);
+
+            WorldHeader {
+                magic,
+                version,
+                __unknown0,
+                __unknown1,
+                size,
+                town,
+            }
         };
 
         Ok(World { header })

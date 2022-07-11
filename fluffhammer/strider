@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+cargo build &>/dev/null
+for file in ../clients/v42/res/world/wdmadrigal/*.bin; do
+    ./target/debug/fluffhammer strider $1 "$file"
+done
